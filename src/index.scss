@@ -111,18 +111,18 @@ a {
     font-weight: 400;
   }
 
-  .form-select {
-    font-size: 0.95rem;
+  .input-cont {
+    font-size: 0.8rem;
     color: #626161;
     font-weight: 400;
-    border: 1px solid #E7E7E7;
+    border-color: #E7E7E7;
     border-radius: 7px !important;
     cursor: pointer;
 
-    option {
-      font-weight: 400;
-      color: #626161;
-    }
+    // option {
+    //   font-weight: 400;
+    //   color: #626161;
+    // }
   }
 
   // Parameters CSS
