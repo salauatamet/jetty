@@ -1,8 +1,8 @@
 import React from "react";
 import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
-import { SlMagnifier } from "react-icons/sl";
-import { SlUser } from "react-icons/sl";
+import { LuSearch } from "react-icons/lu";
+import { LuUser } from "react-icons/lu";
 
 function Header() {
   return (
@@ -14,11 +14,11 @@ function Header() {
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <Navbar.Text className="menu_item">
-            <SlMagnifier />
+            <LuSearch/>
             <a href="/">Найти курьера</a>
           </Navbar.Text>
           <Navbar.Text className="menu_item ml-30">
-            <SlUser />
+            <LuUser/>
             <a href="https://jetty.kz/ru/account">Личный кабинет</a>
           </Navbar.Text>
         </Navbar.Collapse>

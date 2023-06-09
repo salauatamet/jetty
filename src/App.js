@@ -1,13 +1,15 @@
+import React from "react";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "./components/Header";
 import Main from "./components/Main";
 import Search from "./components/Search";
+import Resaults from "./components/Resaults";
 
 function App() {
   return (
-    <div>
+    <>
       <Container fluid>
         <Row>
           <Header />
@@ -20,8 +22,11 @@ function App() {
         <Row>
           <Search />
         </Row>
+        <Row>
+          <Resaults />
+        </Row>
       </Container>
-    </div>
+    </>
   );
 }
 
