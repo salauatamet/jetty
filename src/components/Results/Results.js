@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Header from "./Header";
+import Header from "../Header/Header";
 import Select from 'react-select';
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";

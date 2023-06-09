@@ -2,10 +2,10 @@ import React from "react";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Header from "./components/Header";
-import Main from "./components/Main";
-import Search from "./components/Search";
-import Resaults from "./components/Resaults";
+import Header from "./components/Header/Header";
+import Main from "./components/Main/Main";
+import Search from "./components/Search/Search";
+import Resaults from "./components/Results/Results";
 
 function App() {
   return (

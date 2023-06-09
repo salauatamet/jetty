@@ -1,0 +1,40 @@
+// Header CSS
+.header {
+    background-color: var(--color-primary);
+    padding: 0 15px;
+    margin-bottom: 50px;
+  
+    .navbar {
+      a {
+        color: #fff;
+        font-weight: 500;
+  
+        .logo {
+          &:hover path {
+            fill: #FFFFFF;
+          }
+        }
+      }
+    
+      .menu_item {
+        color: #fff;
+        margin-left: 50px;
+    
+        a {
+          color: #fff;
+          font-size: 14px;
+          font-weight: 400;
+          text-decoration: none;
+        }
+    
+        a:hover {
+          color: #fff;
+        }
+    
+        svg {
+          margin-right: 5px;
+          vertical-align: middle;
+        }
+      }
+    }
+}
