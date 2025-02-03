@@ -9,7 +9,7 @@ function Header() {
     <Navbar fixed="top" className="header pl-15 pr-15">
       <Container className="navbar">
         <Navbar.Brand href="/" className="logo">
-          Jetty
+          Jolta
         </Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
@@ -19,7 +19,7 @@ function Header() {
           </Navbar.Text>
           <Navbar.Text className="menu_item ml-30">
             <LuUser/>
-            <a href="https://jetty.kz/ru/account">Личный кабинет</a>
+            <a href="https://jolta.kz/ru/account">Личный кабинет</a>
           </Navbar.Text>
         </Navbar.Collapse>
       </Container>

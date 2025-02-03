@@ -5,7 +5,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Header from "./components/Header/Header";
 import Main from "./components/Main/Main";
 import Search from "./components/Search/Search";
-import Resaults from "./components/Results/Results";
 
 function App() {
   return (
@@ -21,9 +20,6 @@ function App() {
         </Row>
         <Row>
           <Search />
-        </Row>
-        <Row>
-          <Resaults />
         </Row>
       </Container>
     </>
