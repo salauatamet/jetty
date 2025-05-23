@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom"; // Import
 import "./index.scss";
 import "../src/components/Header/Header.scss";
 import "../src/components/Main/Main.scss";
@@ -11,6 +12,8 @@ import App from "./App";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter> {/* Wrap App */}
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 );

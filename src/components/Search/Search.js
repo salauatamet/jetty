@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import axios from 'axios';
+import React, { useState } from 'react'; // Removed useEffect
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import Select from 'react-select';
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -16,135 +16,96 @@ import { LuZap } from "react-icons/lu";
 import { LuTrash } from "react-icons/lu";
 import { LuPlusCircle } from "react-icons/lu";
 import { LuSearch } from "react-icons/lu";
+import { kazakhstanCities } from '../../services/mockCourierApi'; // fetchMockCourierServices removed as it's not used here anymore
 
-// const selectableOptions = [
-//   { value: 'Adam', label: 'Adam Geoffrey' },
-//   { value: 'Jane', label: 'Jane Hibbard' },
-//   { value: 'Anabelle', label: 'Anabelle Einstein' },
-//   { value: 'Zeus', label: 'Zeus McQueen' }
-// ]
+// Removed commented out code: selectableOptions, url, postService useEffect, old state for options, old getData useEffect
 
-const url = "https://api.github.com/search/users?q=John&per_page=5";
+function Search() { // Removed props: setCourierResults, setIsLoading, setSearchError, appIsLoading
+  const navigate = useNavigate();
 
-function Search() {
+  const [parcels, setParcels] = useState([{ id: Date.now(), weight: '5', width: '10', height: '20', length: '10', quantity: '1' }]);
+  const [pickupCity, setPickupCity] = useState(null);
+  const [deliveryCity, setDeliveryCity] = useState(null);
+  const [isDoorToDoor, setIsDoorToDoor] = useState(false);
 
-  useEffect(() =>{
-    const postService = async () => {
-      try {
-        const response = await axios.post('https://meteor-api.onrender.com/api/v1/get-service-cost',
-          {
-            delivery: {
-              cityId: "49265227",
-              cityName: "Челябинск",
-              countryCode: "RU",
-              index: "140012",
-              regionCode: "74"
-            },
-            parcel: {
-              height: 20,
-              length: 20,
-              quantity: 1,
-              weight: 5,
-              width: 20
-            },
-            pickup: {
-              cityId: "49694102",
-              cityName: "Москва",
-              countryCode: "RU",
-              index: "140012",
-              regionCode: "77"
-            },
-            selfDelivery: true,
-            selfPickup: false,
-          }
-        );
-        console.log("response", response);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    postService();
-  }, [])
+  const handleParcelChange = (id, field, value) => {
+    setParcels(parcels.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
 
-  // const [weight, setWeight] = useState('');
-  // const [width, setWidth] = useState('');
-  // const [height, setHeight] = useState('');
-  // const [length, setLength] = useState('');
-  // const [quantity, setQuantity] = useState('');
-  // onSubmit={handleSubmit}
+  const handleAddParcel = () => {
+    setParcels([...parcels, { id: Date.now(), weight: '', width: '', height: '', length: '', quantity: '1' }]);
+  };
 
-  const [options, setOptions] = useState([""]);
+  const handleDeleteParcel = (id) => {
+    setParcels(parcels.filter(p => p.id !== id));
+  };
 
-  useEffect(() => {
-    const getData = async () => {
-      const arr = [];
-      await axios.get(url).then((res) => {
-        let result = res.data.items;
-        result.map((user) => {
-          return arr.push({value: user.login, label: user.login});
-        });
-        setOptions(arr)
-      });
+  const handleSearch = (event) => {
+    event.preventDefault();
+    // Logic to construct queryParams from state (pickupCity, deliveryCity, parcels[0], isDoorToDoor)
+    const firstParcel = parcels[0] || {}; // Ensure firstParcel is an object even if parcels is empty
+    const queryParams = {
+      from: pickupCity ? pickupCity.value : '', // Using .value for city code
+      to: deliveryCity ? deliveryCity.value : '', // Using .value for city code
+      weight: firstParcel.weight || '',
+      quantity: firstParcel.quantity || '',
+      width: firstParcel.width || '',
+      height: firstParcel.height || '',
+      length: firstParcel.length || '',
+      isDoorToDoor: isDoorToDoor.toString(),
+      // Assuming deliveryType is always "parcel" for now from this form
+      deliveryType: "parcel"
     };
-    getData();
-  }, []);
+
+    // Filter out empty parameters
+    const filteredQueryParams = Object.fromEntries(
+      Object.entries(queryParams).filter(([_, value]) => value !== '')
+    );
+
+    const queryString = new URLSearchParams(filteredQueryParams).toString();
+    navigate(`/results?${queryString}`);
+  };
+
+  // Removed useEffects for logging courierResults and error
+
 
   return (
-    <Form>
+    <Form onSubmit={handleSearch}>
       <Form.Group>
         <Container className="search_wrapper p-20 justify-content-md-center mb-3 g-2">
-        {/* From */}
+        {/* From / To */}
         <Row className="mb-3">
-          <Col>
+          <Col md={6}> {/* Adjusted to md={6} for better spacing on medium screens */}
             <Col className='col-md-12'>
               <p>Откуда</p>
             </Col>
-              <Select 
+              <Select
                 className="input-cont"
-                placeholder="Выберите страну"
-                options={options}
-                isMulti
-                noOptionsMessage={() => "name not found"}
+                placeholder="Выберите город"
+                options={kazakhstanCities}
+                value={pickupCity}
+                onChange={setPickupCity}
+                noOptionsMessage={() => "Город не найден"}
               />
           </Col>
-          <Col>
+          <Col md={6}> {/* Adjusted to md={6} */}
             <Col className='col-md-12'>
               <p>Куда</p>
             </Col>
-            <Select 
+            <Select
                 className="input-cont"
-                placeholder="Выберите страну"
-                options={options}
-                isMulti
-                noOptionsMessage={() => "name not found"}
+                placeholder="Выберите город"
+                options={kazakhstanCities}
+                value={deliveryCity}
+                onChange={setDeliveryCity}
+                noOptionsMessage={() => "Город не найден"}
               />
           </Col>
         </Row>
 
-        {/* To */}
-        <Row className="mb-3">
-          <Col>
-            <Select 
-              className="input-cont"
-              placeholder="Выберите город"
-              options={options}
-              isMulti
-              noOptionsMessage={() => "name not found"}
-            />
-          </Col>
-          <Col>
-            <Select 
-              className="input-cont"
-              placeholder="Выберите город"
-              options={options}
-              isMulti
-              noOptionsMessage={() => "name not found"}
-            />
-          </Col>
-        </Row>
+        {/* Removed redundant second row of city selects */}
 
         {/* Parameters */}
-
         <Row className="cargo_parameters clear">
           <Col className='col-md-12'>
             <p>Параметры</p>
@@ -157,120 +118,120 @@ function Search() {
               fill
             >
               <Tab eventKey="parcel-cargo" title={<span><LuBox/>Посылка/Груз</span>}>
-                {/* onChange={(e) => setWeight(e.target.value)} */}
-                <Col className="col-md-12 d-flex justify-between mt-3">
-                  <InputGroup name="weight-parcel-cargo" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="weight-parcel-cargo"
-                      placeholder="Вес"
-                      aria-label="Вес"
-                      aria-describedby="p-gross_weight-parcel-cargo"
-                      defaultValue="5"
-                    />
-                    <InputGroup.Text id="p-gross_weight-parcel-cargo">кг</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Вес брутто
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  {/* onChange={(e) => setQuantity(e.target.value)} */}
-                  <InputGroup name="quantity-parcel-cargo" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="quantity-parcel-cargo"
-                      placeholder="Кол-во"
-                      aria-label="Кол-во"
-                      aria-describedby="p-quantity-parcel-cargo"
-                      defaultValue="1"
-                    />
-                    <InputGroup.Text id="p-quantity-parcel-cargo">шт</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Количество
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  {/* onChange={(e) => setWidth(e.target.value)} */}
-                  <InputGroup name="width-parcel-cargo" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="width-parcel-cargo"
-                      placeholder="Ширина"
-                      aria-label="Ширина"
-                      aria-describedby="p-width-parcel-cargo"
-                      defaultValue="10"
-                    />
-                    <InputGroup.Text id="p-width-parcel-cargo">см</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Ширина
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  {/* onChange={(e) => setHeight(e.target.value)} */}
-                  <InputGroup name="height-parcel-cargo" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="height-parcel-cargo"
-                      placeholder="Высота"
-                      aria-label="Высота"
-                      aria-describedby="p-height-parcel-cargo"
-                      defaultValue="20"
-                    />
-                    <InputGroup.Text id="p-height-parcel-cargo">см</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Высота
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  {/* onChange={(e) => setLength(e.target.value)} */}
-                  <InputGroup name="length-parcel-cargo" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="length-parcel-cargo"
-                      placeholder="Глубина"
-                      aria-label="Глубина"
-                      aria-describedby="p-depth-parcel-cargo"
-                      defaultValue="10"
-                    />
-                    <InputGroup.Text id="p-depth-parcel-cargo">см</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Глубина
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  <InputGroup name="totalvolume">
-                    <Form.Control
-                      type="text"
-                      id="total-volume-parcel-cargo"
-                      placeholder="Общий объем"
-                      aria-label="Общий объем"
-                      aria-describedby="p-total-volume-parcel-cargo"
-                      defaultValue="0,0685"
-                      disabled
-                    />
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Общий объем, m3
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                </Col>
+                {parcels.map((parcel, index) => (
+                  <div key={parcel.id} className="parcel-item mb-3 p-3 border rounded">
+                    {parcels.length > 1 && <h5 className="mb-2">Посылка {index + 1}</h5>}
+                    <Row>
+                      <Col md={12} className="d-flex flex-wrap justify-content-start"> {/* Changed to flex-wrap and justify-start */}
+                        <InputGroup name={`weight-parcel-cargo-${parcel.id}`} className="mr-20 mb-2" style={{flexBasis: '150px', minWidth: '120px'}}>
+                          <Form.Control
+                            type="number"
+                            placeholder="Вес"
+                            aria-label="Вес"
+                            value={parcel.weight}
+                            onChange={(e) => handleParcelChange(parcel.id, 'weight', e.target.value)}
+                          />
+                          <InputGroup.Text>кг</InputGroup.Text>
+                          <div className="w100p text-center">
+                            <Form.Text className="mute_text" muted>Вес брутто</Form.Text>
+                          </div>
+                        </InputGroup>
+                        <InputGroup name={`quantity-parcel-cargo-${parcel.id}`} className="mr-20 mb-2" style={{flexBasis: '130px', minWidth: '100px'}}>
+                          <Form.Control
+                            type="number"
+                            placeholder="Кол-во"
+                            aria-label="Кол-во"
+                            value={parcel.quantity}
+                            onChange={(e) => handleParcelChange(parcel.id, 'quantity', e.target.value)}
+                          />
+                          <InputGroup.Text>шт</InputGroup.Text>
+                           <div className="w100p text-center">
+                            <Form.Text className="mute_text" muted>Количество</Form.Text>
+                          </div>
+                        </InputGroup>
+                        <InputGroup name={`width-parcel-cargo-${parcel.id}`} className="mr-20 mb-2" style={{flexBasis: '130px', minWidth: '100px'}}>
+                          <Form.Control
+                            type="number"
+                            placeholder="Ширина"
+                            aria-label="Ширина"
+                            value={parcel.width}
+                            onChange={(e) => handleParcelChange(parcel.id, 'width', e.target.value)}
+                          />
+                          <InputGroup.Text>см</InputGroup.Text>
+                          <div className="w100p text-center">
+                            <Form.Text className="mute_text" muted>Ширина</Form.Text>
+                          </div>
+                        </InputGroup>
+                        <InputGroup name={`height-parcel-cargo-${parcel.id}`} className="mr-20 mb-2" style={{flexBasis: '130px', minWidth: '100px'}}>
+                          <Form.Control
+                            type="number"
+                            placeholder="Высота"
+                            aria-label="Высота"
+                            value={parcel.height}
+                            onChange={(e) => handleParcelChange(parcel.id, 'height', e.target.value)}
+                          />
+                          <InputGroup.Text>см</InputGroup.Text>
+                          <div className="w100p text-center">
+                            <Form.Text className="mute_text" muted>Высота</Form.Text>
+                          </div>
+                        </InputGroup>
+                        <InputGroup name={`length-parcel-cargo-${parcel.id}`} className="mr-20 mb-2" style={{flexBasis: '130px', minWidth: '100px'}}>
+                          <Form.Control
+                            type="number"
+                            placeholder="Глубина"
+                            aria-label="Глубина"
+                            value={parcel.length}
+                            onChange={(e) => handleParcelChange(parcel.id, 'length', e.target.value)}
+                          />
+                          <InputGroup.Text>см</InputGroup.Text>
+                          <div className="w100p text-center">
+                            <Form.Text className="mute_text" muted>Глубина</Form.Text>
+                          </div>
+                        </InputGroup>
+                        {index === 0 && ( // Show total volume only for the first parcel or a summary
+                           <InputGroup name="totalvolume" className="mb-2" style={{flexBasis: '150px', minWidth: '120px'}}>
+                            <Form.Control
+                              type="text"
+                              placeholder="Общий объем"
+                              aria-label="Общий объем"
+                              value={((parseFloat(parcels[0].width) * parseFloat(parcels[0].height) * parseFloat(parcels[0].length) * parseFloat(parcels[0].quantity)) / 1000000).toFixed(4) || ""}
+                              disabled
+                            />
+                            <div className="w100p text-center">
+                              <Form.Text className="mute_text" muted>Общий объем, m3</Form.Text>
+                            </div>
+                          </InputGroup>
+                        )}
+                      </Col>
+                    </Row>
+                     {parcels.length > 1 && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => handleDeleteParcel(parcel.id)}
+                          disabled={parcels.length <= 1}
+                        >
+                          <LuTrash /> Удалить посылку {index + 1}
+                        </Button>
+                      )}
+                  </div>
+                ))}
+                 <Button variant="outline-primary" size="sm" onClick={handleAddParcel} className="mt-2">
+                  <LuPlusCircle /> Добавить еще посылку
+                </Button>
               </Tab>
               <Tab eventKey="documentation" title={<span><LuFileBox/>Документы</span>}>
-              <Col className="col-md-12 d-flex justify-between mt-3">
+              <Col className="col-md-12 d-flex justify-between mt-3"> {/* Assuming documents are simpler and don't need multi-add for now */}
                   <InputGroup name="weight-documentation" className="mr-20">
                     <Form.Control
-                      type="text"
+                      type="number" // Changed to number
                       id="weight-documentation"
                       placeholder="Вес"
                       aria-label="Вес"
                       aria-describedby="p-gross-weight-documentation"
-                      defaultValue="0.25"
+                      value={parcels[0]?.weight || ''} // Use first parcel's data
+                      onChange={(e) => handleParcelChange(parcels[0]?.id, 'weight', e.target.value)} // Use first parcel's data
                     />
                     <InputGroup.Text id="p-gross-weight-documentation">кг</InputGroup.Text>
                     <div className="w100p text-center">
@@ -279,15 +240,15 @@ function Search() {
                       </Form.Text>
                     </div>
                   </InputGroup>
-                  {/* onChange={(e) => setQuantity(e.target.value)} */}
                   <InputGroup name="quantity-documentation" className="mr-20">
                     <Form.Control
-                      type="text"
+                      type="number" // Changed to number
                       id="quantity-documentation"
                       placeholder="Кол-во"
                       aria-label="Кол-во"
                       aria-describedby="p-quantity-documentation"
-                      defaultValue="1"
+                      value={parcels[0]?.quantity || ''} // Use first parcel's data
+                      onChange={(e) => handleParcelChange(parcels[0]?.id, 'quantity', e.target.value)} // Use first parcel's data
                     />
                     <InputGroup.Text id="p-quantity-documentation">шт</InputGroup.Text>
                     <div className="w100p text-center">
@@ -296,15 +257,15 @@ function Search() {
                       </Form.Text>
                     </div>
                   </InputGroup>
-                  {/* onChange={(e) => setWidth(e.target.value)} */}
-                  <InputGroup name="width-documentation" className="mr-20">
+                  <InputGroup name="width-documentation" className="mr-20"> {/* Dimensions for docs are often fixed/disabled */}
                     <Form.Control
-                      type="text"
+                      type="number" // Changed to number
                       id="width-documentation"
                       placeholder="Ширина"
                       aria-label="Ширина"
                       aria-describedby="p-width-documentation"
-                      defaultValue="10"
+                      value={parcels[0]?.width || ''} // Use first parcel's data
+                      onChange={(e) => handleParcelChange(parcels[0]?.id, 'width', e.target.value)} // Use first parcel's data
                       disabled
                     />
                     <InputGroup.Text id="p-width-documentation">см</InputGroup.Text>
@@ -314,15 +275,15 @@ function Search() {
                       </Form.Text>
                     </div>
                   </InputGroup>
-                  {/* onChange={(e) => setHeight(e.target.value)} */}
                   <InputGroup name="height-documentation" className="mr-20">
                     <Form.Control
-                      type="text"
+                      type="number" // Changed to number
                       id="height-documentation"
                       placeholder="Высота"
                       aria-label="Высота"
                       aria-describedby="p-height-documentation"
-                      defaultValue="20"
+                      value={parcels[0]?.height || ''} // Use first parcel's data
+                      onChange={(e) => handleParcelChange(parcels[0]?.id, 'height', e.target.value)} // Use first parcel's data
                       disabled
                     />
                     <InputGroup.Text id="p-height-documentation">см</InputGroup.Text>
@@ -332,15 +293,15 @@ function Search() {
                       </Form.Text>
                     </div>
                   </InputGroup>
-                  {/* onChange={(e) => setLength(e.target.value)} */}
                   <InputGroup name="length-documentation" className="mr-20">
                     <Form.Control
-                      type="text"
+                      type="number" // Changed to number
                       id="length-documentation"
                       placeholder="Глубина"
                       aria-label="Глубина"
                       aria-describedby="p-depth-documentation"
-                      defaultValue="10"
+                      value={parcels[0]?.length || ''} // Use first parcel's data
+                      onChange={(e) => handleParcelChange(parcels[0]?.id, 'length', e.target.value)} // Use first parcel's data
                       disabled
                     />
                     <InputGroup.Text id="p-depth-documentation">см</InputGroup.Text>
@@ -352,110 +313,7 @@ function Search() {
                   </InputGroup>
                 </Col>
               </Tab>
-              <Tab eventKey="around-town" title={<span><LuZap/>По городу</span>} disabled>
-              <Col className="col-md-12 d-flex justify-between mt-3">
-                  <InputGroup name="weight-around-town" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="weight-around-town"
-                      placeholder="Вес"
-                      aria-label="Вес"
-                      aria-describedby="p-gross-weight-around-town"
-                      defaultValue="5"
-                    />
-                    <InputGroup.Text id="p-gross-weight-around-town">кг</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Вес брутто
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  {/* onChange={(e) => setQuantity(e.target.value)} */}
-                  <InputGroup name="quantity-around-town" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="quantity-around-town"
-                      placeholder="Кол-во"
-                      aria-label="Кол-во"
-                      aria-describedby="p-quantity-around-town"
-                      defaultValue="1"
-                    />
-                    <InputGroup.Text id="p-quantity-around-town">шт</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Количество
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  {/* onChange={(e) => setWidth(e.target.value)} */}
-                  <InputGroup name="width-around-town" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="width-around-town"
-                      placeholder="Ширина"
-                      aria-label="Ширина"
-                      aria-describedby="p-width-around-town"
-                      defaultValue="10"
-                    />
-                    <InputGroup.Text id="p-width-around-town">см</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Ширина
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  {/* onChange={(e) => setHeight(e.target.value)} */}
-                  <InputGroup name="height-around-town" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="height-around-town"
-                      placeholder="Высота"
-                      aria-label="Высота"
-                      aria-describedby="p-height-around-town"
-                      defaultValue="20"
-                    />
-                    <InputGroup.Text id="p-height-around-town">см</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Высота
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  {/* onChange={(e) => setLength(e.target.value)} */}
-                  <InputGroup name="length-around-town" className="mr-20">
-                    <Form.Control
-                      type="text"
-                      id="length-around-town"
-                      placeholder="Глубина"
-                      aria-label="Глубина"
-                      aria-describedby="p-depth-around-town"
-                      defaultValue="10"
-                    />
-                    <InputGroup.Text id="p-depth-around-town">см</InputGroup.Text>
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Глубина
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                  <InputGroup name="total-volume-around-town">
-                    <Form.Control
-                      type="text"
-                      id="total-volume-around-town"
-                      placeholder="Общий объем"
-                      aria-label="Общий объем"
-                      aria-describedby="p-total-volume-around-town"
-                      defaultValue="0,0685"
-                      disabled
-                    />
-                    <div className="w100p text-center">
-                      <Form.Text className="mute_text" muted>
-                        Общий объем, m3
-                      </Form.Text>
-                    </div>
-                  </InputGroup>
-                </Col>
-              </Tab>
+              {/* Removed "around-town" Tab */}
             </Tabs>
 
 
@@ -502,9 +360,9 @@ function Search() {
           </Col>
           <div className="submit">
             <Col className="col-md-12 d-flex justify-center mt-3">
-              <Button className="submit_btn mr-20" size="lg">
+              <Button type="submit" className="submit_btn mr-20" size="lg" disabled={appIsLoading}>
                 <span>
-                  <LuSearch /> Искать
+                  <LuSearch /> {appIsLoading ? "Идет поиск..." : "Искать"}
                 </span>
               </Button>
             </Col>
@@ -515,5 +373,4 @@ function Search() {
     </Form>
   );
 }
-
 export default Search;
