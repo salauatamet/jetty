@@ -1,147 +1,120 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Header from "../Header/Header";
-import Select from 'react-select';
+import React from 'react';
+// import axios from 'axios'; // Removed
+// import Select from 'react-select'; // Removed
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import Toast from 'react-bootstrap/Toast';
-import Button from 'react-bootstrap/Button';
+// import Toast from 'react-bootstrap/Toast'; // Removed
+import Button from 'react-bootstrap/Button'; // Keep for potential future use (e.g. "Order" button)
 import Card from 'react-bootstrap/Card';
 import "macro-css";
 
-const url = "https://api.github.com/search/users?q=John&per_page=5";
+// const url = "https://api.github.com/search/users?q=John&per_page=5"; // Removed
 
-function Resaults() {
+function Results({ courierData, isLoading, error }) { // Accept props
 
-    const [showA, setShowA] = useState(false);
-    const [showB, setShowB] = useState(false);
+    // Removed old state and useEffect
+    // const [showA, setShowA] = useState(false);
+    // const [showB, setShowB] = useState(false);
+    // const toggleShowA = () => setShowA(!showA);
+    // const toggleShowB = () => setShowB(!showB);
+    // const [options, setOptions] = useState([""]);
+    // useEffect(() => {
+    //     const getData = async () => {
+    //     const arr = [];
+    //     await axios.get(url).then((res) => {
+    //         let result = res.data.items;
+    //         result.map((user) => {
+    //         return arr.push({value: user.login, label: user.login});
+    //         });
+    //         setOptions(arr)
+    //     });
+    //     };
+    //     getData();
+    // }, []);
 
-    const toggleShowA = () => setShowA(!showA);
-    const toggleShowB = () => setShowB(!showB);
+    if (isLoading) {
+        return (
+            <Container className="mt-3">
+                <Row>
+                    <Col className="text-center">
+                        <p>Загрузка результатов...</p>
+                    </Col>
+                </Row>
+            </Container>
+        );
+    }
 
-    const [options, setOptions] = useState([""]);
+    if (error) {
+        return (
+            <Container className="mt-3">
+                <Row>
+                    <Col className="text-center">
+                        <p className="text-danger">Ошибка: {error || "Не удалось загрузить результаты."}</p>
+                    </Col>
+                </Row>
+            </Container>
+        );
+    }
 
-    useEffect(() => {
-        const getData = async () => {
-        const arr = [];
-        await axios.get(url).then((res) => {
-            let result = res.data.items;
-            result.map((user) => {
-            return arr.push({value: user.login, label: user.login});
-            });
-            setOptions(arr)
-        });
-        };
-        getData();
-    }, []);
+    if (!courierData || !courierData.results || courierData.results.length === 0) {
+        return (
+            <Container className="mt-3">
+                <Row>
+                    <Col className="text-center">
+                        <p>Нет результатов. Введите параметры поиска и нажмите Искать.</p>
+                    </Col>
+                </Row>
+            </Container>
+        );
+    }
+
+    // Sort results by priceKZT (cheapest first)
+    const sortedResults = [...courierData.results].sort((a, b) => a.priceKZT - b.priceKZT);
 
     return (
-        <Container>
-            <Row>
-                <Header />
-            </Row>
-            <Row className="resaults_wrapper p-20 m-0 d-flex justify-content-md-center align-start mb-3 g-2">
-                <Col md={6} className="mb-2">
-                    <Button onClick={toggleShowA} className="resaults_filter_cc">
-                        KZ, Алматы - KZ, Алматы
-                    </Button>
-                </Col>
-                <Col md={6} className="mb-2">
-                    <Button onClick={toggleShowB} className="resaults_filter_cc">
-                        1 x Посылка - 25 кг
-                    </Button>
-                </Col>
-                <Col md={12} className="m-0">
-                    <Toast show={showA} onClose={toggleShowA}>
-                        <Toast.Header>
-                            <img
-                            src="holder.js/20x20?text=%20"
-                            className="rounded me-auto"
-                            alt="exit"
-                            />
-                        </Toast.Header>
-                        <Toast.Body>
-                            {/* From */}
-                            <Row className="mb-3">
-                                <Col>
-                                    <Col className='col-md-12'>
-                                    <p>Откуда</p>
-                                    </Col>
-                                    <Select 
-                                        className="input-cont"
-                                        placeholder="Выберите страну"
-                                        options={options}
-                                        isMulti
-                                        noOptionsMessage={() => "name not found"}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Col className='col-md-12'>
-                                    <p>Куда</p>
-                                    </Col>
-                                    <Select 
-                                        className="input-cont"
-                                        placeholder="Выберите страну"
-                                        options={options}
-                                        isMulti
-                                        noOptionsMessage={() => "name not found"}
-                                    />
-                                </Col>
-                            </Row>
-
-                            {/* To */}
-                            <Row className="mb-3">
-                                <Col>
-                                    <Select 
-                                    className="input-cont"
-                                    placeholder="Выберите город"
-                                    options={options}
-                                    isMulti
-                                    noOptionsMessage={() => "name not found"}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Select 
-                                    className="input-cont"
-                                    placeholder="Выберите город"
-                                    options={options}
-                                    isMulti
-                                    noOptionsMessage={() => "name not found"}
-                                    />
-                                </Col>
-                            </Row>
-                        </Toast.Body>
-                    </Toast>
-                </Col>
-                <Col md={12} className="m-0">
-                    <Toast onClose={toggleShowB} show={showB} animation={false}>
-                        <Toast.Header>
-                            <img
-                            src="holder.js/20x20?text=%20"
-                            className="rounded me-auto"
-                            alt="exit"
-                            />
-                        </Toast.Header>
-                        <Toast.Body>Woohoo, you're reading this text in a Toast!</Toast.Body>
-                    </Toast>
-                </Col>
-            </Row>
-            <Row className='p-0 m-0 mt-5'>
-                <Card>
-                    <Card.Img variant="left" src="holder.js/100px180" />
-                    <Card.Body>
-                        <Card.Title>Card Title</Card.Title>
-                        <Card.Text>
-                        Some quick example text to build on the card title and make up the
-                        bulk of the card's content.
-                        </Card.Text>
-                        <Button variant="primary">Go somewhere</Button>
-                    </Card.Body>
-                </Card>
+        <Container className="mt-3 results_container">
+            {/* Removed old Toast and filter buttons section */}
+            <Row className='p-0 m-0 mt-1 d-flex flex-column align-items-center'> {/* This ensures cards stack vertically */}
+                {sortedResults.map((service) => (
+                    <Col xs={12} md={10} lg={8} key={service.id} className="mb-3"> {/* This Col wraps the card for centering/width control */}
+                        <Card className="h-100">
+                          <Row noGutters className="h-100"> {/* Added h-100 to Row for consistent height if needed */}
+                            <Col xs={4} sm={3} md={2} className="d-flex align-items-center justify-content-center p-2">
+                              <Card.Img 
+                                src={service.logoUrl || "/img/placeholder-logo-default.png"} 
+                                alt={`${service.companyName} logo`} 
+                                style={{ width: '100%', height: 'auto', maxHeight: '100px', objectFit: 'contain' }} // Adjusted style
+                              />
+                            </Col>
+                            <Col xs={8} sm={9} md={10}>
+                              <Card.Body className="d-flex flex-column h-100"> {/* Added h-100 to Card.Body */}
+                                <Card.Title>{service.companyName}</Card.Title>
+                                <Card.Text>
+                                  <strong>Цена:</strong> {service.priceKZT} KZT <br />
+                                  <strong>Срок доставки:</strong> {service.estimatedDeliveryDays} дней <br />
+                                  {service.description}
+                                </Card.Text>
+                                {service.rating && (
+                                  <Card.Text>
+                                    <small className="text-muted">Рейтинг: {service.rating}/5</small>
+                                  </Card.Text>
+                                )}
+                                {service.features && service.features.length > 0 && (
+                                  <Card.Text>
+                                    <small>Особенности: {service.features.join(', ')}</small>
+                                  </Card.Text>
+                                )}
+                                <Button variant="primary" className="mt-auto align-self-start">Заказать</Button>
+                              </Card.Body>
+                            </Col>
+                          </Row>
+                        </Card>
+                    </Col>
+                ))}
             </Row>
         </Container>
     );
 }
 
-export default Resaults;
+export default Results;
